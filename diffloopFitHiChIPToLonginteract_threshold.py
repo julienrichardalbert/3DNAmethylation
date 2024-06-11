@@ -6,30 +6,31 @@ import subprocess
 pd.set_option('mode.chained_assignment', None)
 
 userInputFile   = sys.argv[1]
-inputFile       = pd.read_csv(userInputFile, sep=',')
-
-# print(inputFile.head(1))
-read_coverage_per_rep  = inputFile.iloc[:, 6:-9] # get 7th row and all coverage columns (should take all replicates)
-# print(read_coverage_per_rep.head(5))
-read_coverage          = read_coverage_per_rep.sum(axis=1)
+inputFile       = pd.read_csv(userInputFile, sep='\t')
 
 
 
-df = inputFile[['chr_1','start_1','end_1','chr_2','start_2','end_2','logFC','FDR']]
-df["score"] = read_coverage.clip(upper=1000, lower=0) # has to be in this range to appease UCSC
-df.drop(df[df['score']<5].index, inplace=True) #remove rows with less than 5 total read alignments
+'''
+Header from fithichip diffloops output
+chr1	start1	end1	chr2	start2	end2	C1_R1_RawCC	C1_R1_QVal	C1_R2_RawCC	C1_R2_QVal
+C2_R1_RawCC	C2_R1_QVal	C2_R2_RawCC	C2_R2_QVal	logFC	logCPM	PValue	FDR	C1_SigRepl	C2_SigRepl
+'''
+
+df = inputFile[['chr1','start1','end1','chr2','start2','end2','logFC','FDR']]
+df["score"] = 10 # don't need this anymore
+#df.drop(df[df['score']<5].index, inplace=True) #remove rows with less than 5 total read alignments
 
 cutoff = 0.05 # min FDR cutoff
-#df["color"] = np.where( df['logFC'] < 0, "246,133,50", "38,103,153" ) # condition, true, false
-df["color"] = np.where( df['logFC'] < 0, "1,160,115", "158,53,158" ) # for WT ESC vs EpiLC
+df["color"] = np.where( df['logFC'] < 0, "246,133,50", "38,103,153" ) # condition, true, false
+#df["color"] = np.where( df['logFC'] < 0, "1,160,115", "158,53,158" ) # for WT ESC vs EpiLC
 
 df["color"] = np.where( df['FDR']   < cutoff, df["color"], "222,222,222" ) # set non-sigificant loops to grey
 
 df["NA"] = "." # fill in unnecessary columns
 df["colour_calc"] = df["score"] # was previously used for gradient colours
 
-df = df.rename(columns={'chr_1': '#chr', 'start_1': 'start', 'end_1': 'end', 'start_1': 'start'})
-df_to_print = df[['#chr', 'start', 'end_2', 'NA', 'score', 'colour_calc', 'NA', 'color', '#chr', 'start', 'end', 'NA', 'NA', 'chr_2', 'start_2', 'end_2', 'NA', 'NA']]
+df = df.rename(columns={'chr1': '#chr', 'start1': 'start', 'end1': 'end', 'start1': 'start'})
+df_to_print = df[['#chr', 'start', 'end2', 'NA', 'score', 'colour_calc', 'NA', 'color', '#chr', 'start', 'end', 'NA', 'NA', 'chr2', 'start2', 'end2', 'NA', 'NA']]
 #print(df.head(5))
 #print(df_to_print.head(2))
 outTable = "%s_diffloops_x5_FDR_colors_thresh.bed" % (userInputFile)

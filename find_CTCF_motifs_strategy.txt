@@ -79,8 +79,6 @@ URL http://jaspar.genereg.net/matrix/MA0139.1no3
 
 
 Manual  inspection of the FIMO output showed that this actually worked very well.
-There are a few problems:
-  1. what to do about peaks that have more than one motif?
-  2. VisR "join" was totally bugged, probably in relation to problem 1.
-  3. I guess we do a peak-based approach? I dont know!
-
+There is a few problem:
+  1. what to do about peaks that have more than one motif? : combine them!
+  No more problems :)
